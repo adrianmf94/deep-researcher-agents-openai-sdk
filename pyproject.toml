@@ -1,0 +1,12 @@
+[project]
+name = "deep-researcher-openai-sdk"
+version = "0.1.0"
+description = "Deep Research using OpenAI Agents SDK"
+requires-python = ">=3.12"
+dependencies = [
+    "gradio>=5.22.0",
+    "openai-agents>=0.0.15",
+    "python-dotenv>=1.0.1",
+    "sendgrid>=6.11.0",
+    "pydantic>=2.0.0",
+]
