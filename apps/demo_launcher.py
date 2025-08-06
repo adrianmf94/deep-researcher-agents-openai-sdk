@@ -1,54 +1,30 @@
 """Demo Launcher - Shows multiple research domains in one interface."""
 import gradio as gr
 from dotenv import load_dotenv
-from research_manager import ResearchManager
+import sys
+from pathlib import Path
+
+# Add src to path so we can import our modules
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+from deep_researcher.core import ResearchManager, load_domain_config
 
 load_dotenv(override=True)
 
-# Import our specialized managers
-import sys
-sys.path.append('.')
-
-class CruiseResearchManager(ResearchManager):
-    """Cruise-specific research manager."""
-    
-    async def plan_searches(self, query: str):
-        original_instructions = self.planner.instructions
-        self.planner.instructions = (
-            "You are a cruise travel specialist. Create 5 targeted searches for cruise options focusing on: "
-            "cruise lines, pricing, itineraries, reviews, and ship amenities."
-        )
-        result = await super().plan_searches(query)
-        self.planner.instructions = original_instructions
-        return result
-
-class JobResearchManager(ResearchManager):
-    """Job market research manager."""
-    
-    async def plan_searches(self, query: str):
-        original_instructions = self.planner.instructions
-        self.planner.instructions = (
-            "You are a career research specialist. Create 5 targeted searches for job market analysis focusing on: "
-            "job openings, salary ranges, required skills, company insights, and industry trends."
-        )
-        result = await super().plan_searches(query)
-        self.planner.instructions = original_instructions
-        return result
-
-class GeneralResearchManager(ResearchManager):
-    """General research manager (original)."""
-    pass
+# Load domain configurations
+cruise_config = load_domain_config('cruise')
+job_config = load_domain_config('job')
 
 async def run_research(query: str, domain: str):
     """Run research based on selected domain."""
     if domain == "Cruises 🚢":
-        manager = CruiseResearchManager()
+        manager = ResearchManager(domain_config=cruise_config)
         prefix = "🚢 Searching for cruise options..."
     elif domain == "Jobs 💼":
-        manager = JobResearchManager()
+        manager = ResearchManager(domain_config=job_config)
         prefix = "💼 Analyzing job market..."
     else:  # General
-        manager = GeneralResearchManager()
+        manager = ResearchManager()  # No domain config = general research
         prefix = "🔍 Conducting general research..."
     
     yield prefix

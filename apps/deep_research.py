@@ -1,6 +1,12 @@
 import gradio as gr
 from dotenv import load_dotenv
-from research_manager import ResearchManager
+import sys
+from pathlib import Path
+
+# Add src to path so we can import our modules
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+from deep_researcher.core import ResearchManager
 
 load_dotenv(override=True)
 

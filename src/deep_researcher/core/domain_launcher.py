@@ -3,14 +3,14 @@ import gradio as gr
 import sys
 import importlib
 from dotenv import load_dotenv
-from research_manager import ResearchManager
+from .research_manager import ResearchManager
 
 load_dotenv(override=True)
 
 def load_domain_config(domain_name: str):
     """Load domain configuration from the domains directory."""
     try:
-        config_module = importlib.import_module(f'domains.{domain_name}_config')
+        config_module = importlib.import_module(f'deep_researcher.domains.{domain_name}_config')
         return config_module.DOMAIN_CONFIG
     except ImportError:
         raise ValueError(f"Domain configuration '{domain_name}_config' not found in domains/")

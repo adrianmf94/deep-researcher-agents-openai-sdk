@@ -167,15 +167,18 @@ cp .env.example .env
 
 ```bash
 # Method 1: Launch specific domains
-uv run python cruise_finder.py      # 🚢 Cruise research
-uv run python job_finder.py         # 💼 Job market analysis
+uv run python apps/cruise_finder.py      # 🚢 Cruise research
+uv run python apps/job_finder.py         # 💼 Job market analysis
 
 # Method 2: Generic launcher (recommended)  
-uv run python domain_launcher.py cruise
-uv run python domain_launcher.py job
+cd src && python -m deep_researcher.core.domain_launcher cruise
+cd src && python -m deep_researcher.core.domain_launcher job
 
-# Method 3: Original general research
-uv run python deep_research.py      # 🔍 Any topic research
+# Method 3: Multi-domain demo interface
+uv run python apps/demo_launcher.py      # 🎯 All domains in one UI
+
+# Method 4: Original general research
+uv run python apps/deep_research.py      # 🔍 Any topic research
 ```
 
 The web interface will open automatically at `http://localhost:7860`
@@ -186,12 +189,12 @@ Create a new research domain without any code changes:
 
 ```bash
 # 1. Copy existing config
-cp domains/cruise_config.py domains/travel_config.py
+cp src/deep_researcher/domains/cruise_config.py src/deep_researcher/domains/travel_config.py
 
 # 2. Edit the prompts in travel_config.py for your domain
 
 # 3. Launch immediately
-uv run python domain_launcher.py travel
+cd src && python -m deep_researcher.core.domain_launcher travel
 ```
 
 ---
@@ -214,17 +217,28 @@ uv run python domain_launcher.py travel
 
 ```
 deep_researcher_openai_sdk/
-├── domains/
-│   ├── cruise_config.py     # 🚢 Cruise domain configuration
-│   └── job_config.py        # 💼 Job market configuration
-├── domain_launcher.py       # Generic UI generator
-├── research_manager.py      # Core orchestration logic
-├── *_agent.py              # Specialized AI agents
-├── cruise_finder.py        # Domain launcher (9 lines)
-└── job_finder.py           # Domain launcher (9 lines)
+├── src/
+│   └── deep_researcher/
+│       ├── agents/              # 🤖 AI agents
+│       │   ├── planner_agent.py
+│       │   ├── search_agent.py
+│       │   ├── writer_agent.py
+│       │   └── email_agent.py
+│       ├── core/                # 🏗️ Core framework
+│       │   ├── research_manager.py
+│       │   └── domain_launcher.py
+│       └── domains/             # 🎯 Domain configurations  
+│           ├── cruise_config.py
+│           └── job_config.py
+├── apps/                        # 🚀 Runnable applications
+│   ├── cruise_finder.py
+│   ├── job_finder.py
+│   ├── demo_launcher.py
+│   └── deep_research.py
+└── tests/                       # 🧪 Future test suite
 ```
 
-The beauty is in the simplicity - each domain file is now just 9 lines that load a configuration.
+**Professional Python Package Structure** - Following `src/` layout best practices for clean imports and easy packaging.
 
 ---
 
