@@ -6,6 +6,11 @@ from email_agent import email_agent
 import asyncio
 
 class ResearchManager:
+    """Modular research manager that can be configured for different domains."""
+    
+    def __init__(self, domain_config=None):
+        """Initialize with optional domain configuration."""
+        self.domain_config = domain_config
 
     async def run(self, query: str):
         """ Run the deep research process, yielding the status updates and the final report"""
@@ -28,12 +33,22 @@ class ResearchManager:
     async def plan_searches(self, query: str) -> WebSearchPlan:
         """ Plan the searches to perform for the query """
         print("Planning searches...")
-        result = await Runner.run(
-            planner_agent,
-            f"Query: {query}",
-        )
-        print(f"Will perform {len(result.final_output.searches)} searches")
-        return result.final_output_as(WebSearchPlan)
+        
+        # Apply domain-specific instructions if configured
+        original_instructions = planner_agent.instructions
+        if self.domain_config and 'agent_instructions' in self.domain_config:
+            planner_agent.instructions = self.domain_config['agent_instructions'].get('planner', original_instructions)
+        
+        try:
+            result = await Runner.run(
+                planner_agent,
+                f"Query: {query}",
+            )
+            print(f"Will perform {len(result.final_output.searches)} searches")
+            return result.final_output_as(WebSearchPlan)
+        finally:
+            # Always restore original instructions
+            planner_agent.instructions = original_instructions
 
     async def perform_searches(self, search_plan: WebSearchPlan) -> list[str]:
         """ Perform the searches to perform for the query """
@@ -53,6 +68,12 @@ class ResearchManager:
     async def search(self, item: WebSearchItem) -> str | None:
         """ Perform a search for the query """
         input = f"Search term: {item.query}\nReason for searching: {item.reason}"
+        
+        # Apply domain-specific instructions if configured
+        original_instructions = search_agent.instructions
+        if self.domain_config and 'agent_instructions' in self.domain_config:
+            search_agent.instructions = self.domain_config['agent_instructions'].get('searcher', original_instructions)
+        
         try:
             result = await Runner.run(
                 search_agent,
@@ -61,18 +82,30 @@ class ResearchManager:
             return str(result.final_output)
         except Exception:
             return None
+        finally:
+            # Always restore original instructions
+            search_agent.instructions = original_instructions
 
     async def write_report(self, query: str, search_results: list[str]) -> ReportData:
         """ Write the report for the query """
         print("Thinking about report...")
         input = f"Original query: {query}\nSummarized search results: {search_results}"
-        result = await Runner.run(
-            writer_agent,
-            input,
-        )
-
-        print("Finished writing report")
-        return result.final_output_as(ReportData)
+        
+        # Apply domain-specific instructions if configured
+        original_instructions = writer_agent.instructions
+        if self.domain_config and 'agent_instructions' in self.domain_config:
+            writer_agent.instructions = self.domain_config['agent_instructions'].get('writer', original_instructions)
+        
+        try:
+            result = await Runner.run(
+                writer_agent,
+                input,
+            )
+            print("Finished writing report")
+            return result.final_output_as(ReportData)
+        finally:
+            # Always restore original instructions
+            writer_agent.instructions = original_instructions
     
     async def send_email(self, report: ReportData) -> None:
         print("Writing email...")
